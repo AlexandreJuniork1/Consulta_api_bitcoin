@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app">
+        <h1>Painel de {{ title }} 
+            <p>{{localTime}}</p>
+        </h1>
+        <div class="parent">
+            <div class="item">
+                <div class="header">Moeda: {{ info.market }} </div> 
+                <div id="status">
+                    <div>Maior valor negociado: {{ info.high }} </div>
+                    <div>menor valor negociado: {{ info.low }}</div>
+                    <div>Ultimo valor negociado: {{ info.last }} </div>
+                </div>
+                <div class="header">{{ info.date }}</div>
+            </div>
+        </section>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    let app = new Vue({
+        el: '#app',
+        data: {
+            title: 'Consulta Criptomoedas!',
+            localTime: " ",
+            info: null,
+            loading: true,
+            errored: false,
+        },
+        filters: {
+            currencydecimal (value) {
+            return value.toFixed(2)
+            }
+        },
+        methods: {
+            showLocaleTime: function () {
+                var time = this;
+                setInterval(function () {
+                    time.localTime = new Date().toLocaleTimeString();
+                }, 1000);
+            },
+            showDataStats: function (){
+                axios
+                .get('https://api.bitpreco.com/btc-brl/ticker')
+                .then(response => {
+                    this.info = response.data   
+                })
+                .catch(error => {
+                    console.log(error)
+                    this.errored = true
+                })
+                .finally(() => this.loading = false)
+            },
+            status: function(status){
+                if(status == 'ativo') {
+                    return 'up';
+                }
+                else if(status == 'inativo') {
+                    return 'down';
+                }
+                else{
+                    return 'desativado';
+                }
+            }
+        },
+        mounted() {
+            this.showLocaleTime();
+            this.showDataStats();
+
+        }
+            
+    });
+</script>
+
+</html>
